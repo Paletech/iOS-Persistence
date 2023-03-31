@@ -38,6 +38,7 @@ public extension NSManagedObjectContext {
             try save()
             return true
         } catch {
+            rollback()
             return false
         }
     }

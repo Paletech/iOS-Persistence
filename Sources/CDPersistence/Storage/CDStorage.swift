@@ -7,14 +7,21 @@
 
 import CoreData
 
+public enum StoreType {
+    case sqlite
+    case inMemory
+}
+
 open class CDStorage {
     
     private let modelName: String
     private let bundle: Bundle
+    private let storeType: StoreType
     
-    public init(modelName: String, bundle: Bundle) {
+    public init(modelName: String, bundle: Bundle, storeType: StoreType = .sqlite) {
         self.modelName = modelName
         self.bundle = bundle
+        self.storeType = storeType
     }
     
     public lazy var persistentContainer: NSPersistentContainer = {
@@ -28,6 +35,15 @@ open class CDStorage {
         let description = NSPersistentStoreDescription()
         description.shouldMigrateStoreAutomatically = true
         description.shouldInferMappingModelAutomatically = true
+        
+        switch storeType {
+        case .sqlite:
+            description.type = NSSQLiteStoreType
+            description.url = NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("\(modelName).sqlite")
+        case .inMemory:
+            description.type = NSInMemoryStoreType
+        }
+        
         container.persistentStoreDescriptions = [description]
         
         container.loadPersistentStores { _, error in
